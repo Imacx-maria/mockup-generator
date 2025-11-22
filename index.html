@@ -1,0 +1,2916 @@
+<!doctype html>
+<!--
+  MOCKUP GENERATOR
+
+  A client-side tool to place logos on products with perspective.
+  Works completely offline.
+-->
+<html lang="en" class="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Gerador de Mockups de Produto</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- PDF.js for PDF support -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+        <script>
+            if (typeof pdfjsLib !== "undefined") {
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            }
+        </script>
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            orange: {
+                                50: "#fff7ed",
+                                100: "#ffedd5",
+                                200: "#fed7aa",
+                                300: "#fdba74",
+                                400: "#fb923c",
+                                500: "#FF7518",
+                                600: "#ea580c",
+                                700: "#c2410c",
+                                800: "#9a3412",
+                                900: "#7c2d12",
+                            },
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            input[type="range"] {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100%;
+                background: transparent;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                height: 16px;
+                width: 16px;
+                border-radius: 50%;
+                background: #ff7518;
+                cursor: pointer;
+                margin-top: -6px;
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+
+            .dark input[type="range"]::-webkit-slider-thumb {
+                box-shadow: 0 0 0 2px #1a1a1a;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                box-shadow: 0 0 0 2px #ffffff;
+            }
+
+            input[type="range"]::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 4px;
+                cursor: pointer;
+                border-radius: 2px;
+            }
+
+            .dark input[type="range"]::-webkit-slider-runnable-track {
+                background: #2a2a2a;
+            }
+
+            input[type="range"]::-webkit-slider-runnable-track {
+                background: #e5e5e5;
+            }
+
+            input[type="range"]:focus {
+                outline: none;
+            }
+
+            input[type="file"]::file-selector-button {
+                border: 1px solid;
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-right: 1rem;
+                font-family: monospace;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+
+            .dark input[type="file"]::file-selector-button {
+                background-color: #2a2a2a;
+                color: #e5e5e5;
+                border-color: #404040;
+            }
+
+            .dark input[type="file"]::file-selector-button:hover {
+                background-color: #404040;
+                border-color: #525252;
+            }
+
+            input[type="file"]::file-selector-button {
+                background-color: #f5f5f5;
+                color: #171717;
+                border-color: #d4d4d4;
+            }
+
+            input[type="file"]::file-selector-button:hover {
+                background-color: #e5e5e5;
+                border-color: #a3a3a3;
+            }
+
+            /* Custom scrollbar styles */
+            main::-webkit-scrollbar,
+            #bgRemovalModal .overflow-y-auto::-webkit-scrollbar {
+                width: 12px;
+            }
+
+            main::-webkit-scrollbar-track,
+            #bgRemovalModal .overflow-y-auto::-webkit-scrollbar-track {
+                background: #262626;
+            }
+
+            main::-webkit-scrollbar-thumb,
+            #bgRemovalModal .overflow-y-auto::-webkit-scrollbar-thumb {
+                background: #f97316;
+                border-radius: 6px;
+            }
+
+            main::-webkit-scrollbar-thumb:hover,
+            #bgRemovalModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+                background: #ea580c;
+            }
+        </style>
+    </head>
+
+    <body
+        class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans h-screen flex flex-col overflow-hidden transition-colors"
+    >
+        <!-- Header -->
+        <header
+            class="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-6 shrink-0"
+        >
+            <div
+                class="max-w-screen-2xl mx-auto flex items-center justify-between"
+            >
+                <div class="flex items-center">
+                    <img
+                        id="mainLogo"
+                        src="LOGOS/imacx_pos.svg"
+                        alt="IMACX"
+                        class="h-16"
+                    />
+                </div>
+                <div class="flex items-center gap-4">
+                    <button
+                        id="helpToggle"
+                        class="p-2 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+                        title="Instructions"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </button>
+                    <button
+                        id="themeToggle"
+                        class="p-2 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+                    >
+                        <svg
+                            id="sunIcon"
+                            class="w-5 h-5 hidden dark:block"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                            />
+                        </svg>
+                        <svg
+                            id="moonIcon"
+                            class="w-5 h-5 block dark:hidden"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                            />
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span
+                            class="text-xs font-mono text-neutral-500 dark:text-neutral-500"
+                            >SISTEMA PRONTO</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Help Modal -->
+        <div
+            id="helpModal"
+            class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+        >
+            <div
+                class="bg-white dark:bg-neutral-900 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto"
+            >
+                <div
+                    class="sticky top-0 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-6 flex items-center justify-between"
+                >
+                    <h2 class="text-xl font-bold flex items-center gap-3">
+                        <span class="w-3 h-6 bg-orange-500 rounded-sm"></span>
+                        Guia Rápido
+                    </h2>
+                    <button
+                        id="closeHelp"
+                        class="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                    >
+                        <svg
+                            class="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-6 text-sm">
+                    <section>
+                        <h3 class="text-lg font-bold mb-3 text-orange-500">
+                            Como Funciona
+                        </h3>
+                        <p class="text-neutral-600 dark:text-neutral-400">
+                            Esta ferramenta aplica o seu logótipo em produtos
+                            com perspectiva perfeita usando matemática (sem IA).
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-bold mb-3 text-orange-500">
+                            Passos Básicos
+                        </h3>
+                        <ol
+                            class="space-y-2 text-neutral-600 dark:text-neutral-400 list-decimal list-inside"
+                        >
+                            <li>
+                                <strong>Preencha os detalhes do produto</strong>
+                                - Título, descrição, dimensão de impressão e
+                                número de cores
+                            </li>
+                            <li>
+                                <strong>Carregue as imagens</strong> - Imagem do
+                                produto e logótipo (PNG com fundo transparente
+                                recomendado)
+                            </li>
+                            <li>
+                                <strong>Ajuste o logótipo</strong> - Arraste
+                                para reposicionar, ajuste o tamanho e a rotação
+                            </li>
+                            <li>
+                                <strong>Escolha o modo de renderização</strong>
+                                - Sobreposição 2D para produtos planos,
+                                Perspectiva para produtos 3D
+                            </li>
+                            <li>
+                                <strong>Gere a apresentação</strong> - Use o
+                                botão "Apresentação Desktop" para visualizar e
+                                exportar
+                            </li>
+                        </ol>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-bold mb-3 text-orange-500">
+                            Modos de Renderização
+                        </h3>
+                        <div class="space-y-3">
+                            <div
+                                class="p-4 bg-neutral-50 dark:bg-neutral-950 rounded-lg"
+                            >
+                                <h4 class="font-bold mb-2">
+                                    Sobreposição 2D (Recomendado)
+                                </h4>
+                                <p
+                                    class="text-neutral-600 dark:text-neutral-400 text-xs"
+                                >
+                                    Perfeito para produtos planos como cartões,
+                                    autocolantes e caixas. Renderização
+                                    instantânea com controlos de arrastar.
+                                </p>
+                            </div>
+                            <div
+                                class="p-4 bg-neutral-50 dark:bg-neutral-950 rounded-lg"
+                            >
+                                <h4 class="font-bold mb-2">Modo Perspectiva</h4>
+                                <p
+                                    class="text-neutral-600 dark:text-neutral-400 text-xs"
+                                >
+                                    Para produtos 3D com superfícies curvas ou
+                                    angulares. Arraste os cantos para ajustar a
+                                    perspectiva. Clique dentro para mover todo o
+                                    logótipo.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-bold mb-3 text-orange-500">
+                            Dicas
+                        </h3>
+                        <ul
+                            class="space-y-2 text-neutral-600 dark:text-neutral-400 text-xs"
+                        >
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Use logótipos PNG com fundo transparente
+                                    para melhores resultados</span
+                                >
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Se o logótipo tiver fundo, use a ferramenta
+                                    "Remover Fundo" para torná-lo transparente
+                                    ou branco</span
+                                >
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Para produtos planos, use o modo
+                                    Sobreposição 2D</span
+                                >
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Para produtos 3D, use o modo Perspectiva e
+                                    ajuste os cantos</span
+                                >
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Todas as alterações atualizam em tempo real
+                                    no canvas</span
+                                >
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-500 mt-1">✓</span>
+                                <span
+                                    >Funciona completamente offline - sem
+                                    necessidade de internet</span
+                                >
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-bold mb-3 text-orange-500">
+                            Resolução de Problemas
+                        </h3>
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <strong
+                                    class="text-neutral-900 dark:text-neutral-100"
+                                    >Logótipo não visível?</strong
+                                >
+                                <p
+                                    class="text-neutral-600 dark:text-neutral-400"
+                                >
+                                    → Certifique-se de que ambas as imagens
+                                    estão carregadas
+                                </p>
+                            </div>
+                            <div>
+                                <strong
+                                    class="text-neutral-900 dark:text-neutral-100"
+                                    >Não consegue reposicionar?</strong
+                                >
+                                <p
+                                    class="text-neutral-600 dark:text-neutral-400"
+                                >
+                                    → Certifique-se de que carregou ambas as
+                                    imagens primeiro
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Removal Modal -->
+        <div
+            id="bgRemovalModal"
+            class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+        >
+            <div
+                class="bg-white dark:bg-neutral-900 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            >
+                <div
+                    class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-6 flex items-center justify-between"
+                >
+                    <h2 class="text-xl font-bold flex items-center gap-3">
+                        <span class="w-3 h-6 bg-orange-500 rounded-sm"></span>
+                        Remover Fundo do Logótipo
+                    </h2>
+                    <button
+                        id="closeBgRemoval"
+                        class="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                    >
+                        <svg
+                            class="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <div
+                    class="p-6 flex-1 overflow-y-auto"
+                    style="
+                        scrollbar-width: thin;
+                        scrollbar-color: #ff7518 #262626;
+                    "
+                >
+                    <div class="grid grid-cols-2 gap-6 h-full">
+                        <!-- Left: Original -->
+                        <div class="space-y-3">
+                            <h3
+                                class="text-sm font-mono uppercase tracking-wider text-neutral-500"
+                            >
+                                Original
+                            </h3>
+                            <div
+                                class="bg-neutral-100 dark:bg-neutral-950 rounded-lg border-2 border-neutral-200 dark:border-neutral-800 aspect-square flex items-center justify-center overflow-hidden"
+                                style="
+                                    background-image: repeating-conic-gradient(
+                                            #e5e5e5 0% 25%,
+                                            transparent 0% 50%
+                                        )
+                                        50% / 20px 20px;
+                                "
+                            >
+                                <canvas
+                                    id="bgRemovalOriginal"
+                                    class="max-w-full max-h-full"
+                                ></canvas>
+                            </div>
+                        </div>
+                        <!-- Right: Preview -->
+                        <div class="space-y-3">
+                            <h3
+                                id="previewModeTitle"
+                                class="text-sm font-mono uppercase tracking-wider text-neutral-500"
+                            >
+                                Preview
+                            </h3>
+                            <div
+                                id="previewContainer"
+                                class="bg-neutral-100 dark:bg-neutral-950 rounded-lg border-2 border-dashed border-orange-500 aspect-square flex items-center justify-center overflow-hidden"
+                                style="
+                                    background-image: repeating-conic-gradient(
+                                            #e5e5e5 0% 25%,
+                                            transparent 0% 50%
+                                        )
+                                        50% / 20px 20px;
+                                "
+                            >
+                                <canvas
+                                    id="bgRemovalPreview"
+                                    class="max-w-full max-h-full"
+                                ></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODE TOGGLE -->
+                    <div class="mt-6 space-y-3">
+                        <label
+                            class="text-xs font-mono uppercase tracking-wider text-neutral-500"
+                        >
+                            Ação na Cor Selecionada
+                        </label>
+                        <div class="flex gap-3">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer px-4 py-2 bg-neutral-100 dark:bg-neutral-950 rounded-lg border-2 border-neutral-300 dark:border-neutral-700 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 transition-all"
+                            >
+                                <input
+                                    type="radio"
+                                    name="bgMode"
+                                    value="transparent"
+                                    checked
+                                    class="w-4 h-4 text-orange-500 accent-orange-500"
+                                />
+                                <span class="text-sm font-mono"
+                                    >🔲 TORNAR TRANSPARENTE</span
+                                >
+                            </label>
+                            <label
+                                class="flex items-center gap-2 cursor-pointer px-4 py-2 bg-neutral-100 dark:bg-neutral-950 rounded-lg border-2 border-neutral-300 dark:border-neutral-700 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 transition-all"
+                            >
+                                <input
+                                    type="radio"
+                                    name="bgMode"
+                                    value="white"
+                                    class="w-4 h-4 text-orange-500 accent-orange-500"
+                                />
+                                <span class="text-sm font-mono"
+                                    >⬜ MUDAR COR PARA BRANCO</span
+                                >
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 space-y-2">
+                                <label
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500"
+                                >
+                                    Clique na imagem para selecionar a cor de
+                                    fundo
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        id="selectedColor"
+                                        class="w-12 h-12 rounded-lg border-2 border-neutral-300 dark:border-neutral-700"
+                                        style="background: #ffffff"
+                                    ></div>
+                                    <div class="flex-1">
+                                        <label
+                                            class="text-xs font-mono text-neutral-500 mb-1 block"
+                                            >Tolerância</label
+                                        >
+                                        <input
+                                            type="range"
+                                            id="toleranceRange"
+                                            min="0"
+                                            max="100"
+                                            value="30"
+                                            class="w-full"
+                                        />
+                                        <div
+                                            class="flex justify-between text-xs text-neutral-500 mt-1"
+                                        >
+                                            <span>Preciso</span>
+                                            <span
+                                                id="toleranceValue"
+                                                class="font-bold text-orange-500"
+                                                >30</span
+                                            >
+                                            <span>Amplo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="p-6 border-t border-neutral-200 dark:border-neutral-800 flex gap-3"
+                >
+                    <button
+                        id="undoBgRemoval"
+                        disabled
+                        class="py-3 px-6 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-900 dark:text-white font-bold rounded-lg transition-colors flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                            />
+                        </svg>
+                        REVERTER
+                    </button>
+                    <button
+                        id="cancelBgRemoval"
+                        class="flex-1 py-3 px-6 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-bold rounded-lg transition-colors"
+                    >
+                        CANCELAR
+                    </button>
+                    <button
+                        id="applyBgRemoval"
+                        class="flex-1 py-3 px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-colors"
+                    >
+                        APLICAR & USAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main
+            class="flex-1 p-8 overflow-y-scroll overflow-x-hidden"
+            style="scrollbar-width: thin; scrollbar-color: #ff7518 #262626"
+        >
+            <div class="max-w-screen-2xl mx-auto flex flex-col gap-8">
+                <!-- Top: Product Details Card -->
+                <div
+                    class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-8 shadow-xl"
+                >
+                    <div class="space-y-6">
+                        <!-- Cliente and Ref on same line -->
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <label
+                                    for="clientName"
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    01. Cliente
+                                </label>
+                                <input
+                                    type="text"
+                                    id="clientName"
+                                    placeholder="Nome do cliente..."
+                                    class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                />
+                            </div>
+                            <div class="space-y-3">
+                                <label
+                                    for="refNumber"
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    02. Ref
+                                </label>
+                                <input
+                                    type="text"
+                                    id="refNumber"
+                                    placeholder="Referência..."
+                                    class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="space-y-3">
+                            <label
+                                for="productTitle"
+                                class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                            >
+                                <span
+                                    class="w-2 h-2 bg-orange-500 rounded-full"
+                                ></span>
+                                03. Título do Produto
+                            </label>
+                            <input
+                                type="text"
+                                id="productTitle"
+                                placeholder="Insira o título do produto..."
+                                class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                            />
+                        </div>
+
+                        <!-- Description, Quantity and Date -->
+                        <div
+                            class="grid gap-6"
+                            style="grid-template-columns: 1fr auto auto"
+                        >
+                            <div class="space-y-3">
+                                <label
+                                    for="productDescription"
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    04. Descrição
+                                </label>
+                                <textarea
+                                    id="productDescription"
+                                    placeholder="Insira a descrição do produto..."
+                                    rows="4"
+                                    class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono resize-none"
+                                ></textarea>
+                            </div>
+                            <div class="space-y-3">
+                                <label
+                                    for="quantity"
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    05. Qtd
+                                </label>
+                                <input
+                                    type="text"
+                                    id="quantity"
+                                    placeholder="50, 100, 200..."
+                                    class="w-32 px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                />
+                            </div>
+                            <div class="space-y-3">
+                                <label
+                                    for="deliveryDate"
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    06. Data
+                                </label>
+                                <input
+                                    type="date"
+                                    id="deliveryDate"
+                                    class="w-40 px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Canvas and Controls -->
+                <div class="flex flex-col lg:flex-row gap-8 items-stretch">
+                    <!-- Left: Canvas Area -->
+                    <div class="shrink-0">
+                        <div
+                            class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-6 shadow-xl"
+                        >
+                            <div
+                                class="bg-neutral-100 dark:bg-neutral-950 rounded-md border border-neutral-200 dark:border-neutral-800 relative overflow-hidden flex items-center justify-center"
+                                style="width: 600px; height: 600px"
+                            >
+                                <canvas
+                                    id="mockupCanvas"
+                                    width="600"
+                                    height="600"
+                                    class="block w-full h-full cursor-move"
+                                ></canvas>
+
+                                <!-- Empty State Overlay -->
+                                <div
+                                    id="emptyState"
+                                    class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-100/90 dark:bg-neutral-950/90 backdrop-blur-sm text-center p-6 pointer-events-none"
+                                >
+                                    <div
+                                        class="w-20 h-20 border-2 border-dashed border-neutral-300 dark:border-neutral-700 rounded-full flex items-center justify-center mb-6 text-neutral-400 dark:text-neutral-600"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="40"
+                                            height="40"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.5"
+                                        >
+                                            <rect
+                                                x="3"
+                                                y="3"
+                                                width="18"
+                                                height="18"
+                                                rx="2"
+                                                ry="2"
+                                            />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <polyline
+                                                points="21 15 16 10 5 21"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p
+                                        class="text-base font-mono uppercase tracking-wider mb-2"
+                                    >
+                                        Canvas Pronto
+                                    </p>
+                                    <p
+                                        class="text-xs font-mono text-neutral-500 dark:text-neutral-600"
+                                    >
+                                        Carregue imagens do painel →
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="mt-5 pt-5 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-center gap-3 text-xs font-mono text-neutral-500 dark:text-neutral-600"
+                            >
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path d="M3.5 12h17" />
+                                    <path d="M12 3.5v17" />
+                                </svg>
+                                <span
+                                    >ARRASTE O LOGÓTIPO PARA REPOSICIONAR</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Mockup Controls Card -->
+                    <div
+                        class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-8 shadow-xl flex-1 flex flex-col"
+                    >
+                        <div class="space-y-8 flex-1">
+                            <!-- Product and Logo Inputs - Side by Side -->
+                            <div class="grid grid-cols-2 gap-6">
+                                <!-- Product Input -->
+                                <div class="space-y-4">
+                                    <label
+                                        class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2 mb-3"
+                                    >
+                                        <span
+                                            class="w-2 h-2 bg-orange-500 rounded-full"
+                                        ></span>
+                                        07. Imagem do Produto
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="productInput"
+                                        accept="image/*"
+                                        class="block w-full text-sm text-neutral-600 dark:text-neutral-500 file:mr-4 file:py-3 file:px-6 file:rounded-md file:border-0 file:text-xs file:font-mono cursor-pointer focus:outline-none bg-neutral-100 dark:bg-neutral-950/30 p-3 rounded-md border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
+                                    />
+                                </div>
+
+                                <!-- Logo Input -->
+                                <div class="space-y-4">
+                                    <label
+                                        class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2 mb-3"
+                                    >
+                                        <span
+                                            class="w-2 h-2 bg-orange-500 rounded-full"
+                                        ></span>
+                                        08. Imagem do Logótipo
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="logoInput"
+                                        accept="image/*,.pdf"
+                                        class="block w-full text-sm text-neutral-600 dark:text-neutral-500 file:mr-4 file:py-3 file:px-6 file:rounded-md file:border-0 file:text-xs file:font-mono cursor-pointer focus:outline-none bg-neutral-100 dark:bg-neutral-950/30 p-3 rounded-md border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
+                                    />
+                                    <button
+                                        id="removeBgBtn"
+                                        disabled
+                                        class="w-full py-2 px-4 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 disabled:bg-neutral-100 dark:disabled:bg-neutral-900 disabled:text-neutral-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed text-neutral-900 dark:text-white font-mono text-xs rounded-md transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
+                                        REMOVER FUNDO
+                                    </button>
+                                    <p
+                                        class="text-[10px] text-neutral-500 font-mono"
+                                    >
+                                        Suporta: PNG, JPG, PDF | AI/CDR: exporte
+                                        como PDF primeiro
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div
+                                class="h-px bg-neutral-300 dark:bg-neutral-700 w-full my-8"
+                            ></div>
+
+                            <!-- Logo Size and Rotation - Side by Side -->
+                            <div class="grid grid-cols-2 gap-6">
+                                <!-- Scale Control -->
+                                <div class="space-y-4">
+                                    <div
+                                        class="flex justify-between items-center mb-3"
+                                    >
+                                        <label
+                                            for="scaleRange"
+                                            class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                        >
+                                            <span
+                                                class="w-2 h-2 bg-orange-500 rounded-full"
+                                            ></span>
+                                            09. Tamanho do Logótipo
+                                        </label>
+                                        <span
+                                            class="text-sm font-mono font-bold text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-500/10 px-3 py-1.5 rounded-md"
+                                            ><span id="scaleLabel">50</span
+                                            >%</span
+                                        >
+                                    </div>
+                                    <input
+                                        type="range"
+                                        id="scaleRange"
+                                        min="10"
+                                        max="200"
+                                        value="50"
+                                        class="w-full"
+                                    />
+                                </div>
+
+                                <!-- Rotation Control -->
+                                <div class="space-y-4">
+                                    <div
+                                        class="flex justify-between items-center mb-3"
+                                    >
+                                        <label
+                                            for="rotationRange"
+                                            class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                        >
+                                            <span
+                                                class="w-2 h-2 bg-orange-500 rounded-full"
+                                            ></span>
+                                            10. Rotação
+                                        </label>
+                                        <span
+                                            class="text-sm font-mono font-bold text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-500/10 px-3 py-1.5 rounded-md"
+                                            ><span id="rotationLabel">0</span
+                                            >°</span
+                                        >
+                                    </div>
+
+                                    <div class="flex items-center gap-4">
+                                        <button
+                                            id="rotateLeftBtn"
+                                            class="shrink-0 w-10 h-10 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md transition-colors border border-neutral-300 dark:border-neutral-700 flex items-center justify-center"
+                                            title="-90°"
+                                        >
+                                            <svg
+                                                width="14"
+                                                height="14"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path
+                                                    d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                                                />
+                                                <path d="M3 3v5h5" />
+                                            </svg>
+                                        </button>
+
+                                        <input
+                                            type="range"
+                                            id="rotationRange"
+                                            min="-180"
+                                            max="180"
+                                            value="0"
+                                            class="flex-1"
+                                        />
+
+                                        <button
+                                            id="rotateRightBtn"
+                                            class="shrink-0 w-10 h-10 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-md transition-colors border border-neutral-300 dark:border-neutral-700 flex items-center justify-center"
+                                            title="+90°"
+                                        >
+                                            <svg
+                                                width="14"
+                                                height="14"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                            >
+                                                <path
+                                                    d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                                                />
+                                                <path d="M21 3v5h-5" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="h-px bg-neutral-300 dark:bg-neutral-700 w-full my-8"
+                            ></div>
+
+                            <!-- Print Size and Colors - Side by Side -->
+                            <div class="grid grid-cols-2 gap-6">
+                                <!-- Print Size -->
+                                <div class="space-y-3">
+                                    <label
+                                        for="printSize"
+                                        class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                    >
+                                        <span
+                                            class="w-2 h-2 bg-orange-500 rounded-full"
+                                        ></span>
+                                        11. Dimensão de Impressão
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="printSize"
+                                        placeholder="10x10cm"
+                                        class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                    />
+                                </div>
+
+                                <!-- Number of Colors -->
+                                <div class="space-y-3">
+                                    <label
+                                        for="numColors"
+                                        class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                                    >
+                                        <span
+                                            class="w-2 h-2 bg-orange-500 rounded-full"
+                                        ></span>
+                                        12. Cores
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="numColors"
+                                        min="1"
+                                        max="99"
+                                        placeholder="1"
+                                        class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-950/30 border border-neutral-200 dark:border-neutral-800 rounded-md text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Mode Toggle -->
+                            <div class="space-y-4">
+                                <label
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2 mb-3"
+                                >
+                                    <span
+                                        class="w-2 h-2 bg-orange-500 rounded-full"
+                                    ></span>
+                                    13. Modo de Renderização
+                                </label>
+                                <div class="flex gap-2">
+                                    <button
+                                        id="mode2D"
+                                        class="flex-1 py-2.5 px-4 text-xs font-mono font-bold rounded-md transition-all border-2 bg-orange-500 text-white border-orange-500"
+                                    >
+                                        SOBREPOSIÇÃO 2D
+                                    </button>
+                                    <button
+                                        id="modePerspective"
+                                        class="flex-1 py-2.5 px-4 text-xs font-mono font-bold rounded-md transition-all border-2 border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-orange-500 hover:text-orange-500"
+                                    >
+                                        PERSPECTIVA
+                                    </button>
+                                </div>
+                                <p
+                                    class="text-xs text-neutral-500 dark:text-neutral-600 font-mono"
+                                >
+                                    <span id="modeDesc"
+                                        >Sobreposição rápida para produtos
+                                        planos</span
+                                    >
+                                </p>
+                                <!-- Lock Perspective Button (shown only in perspective mode) -->
+                                <button
+                                    id="lockPerspective"
+                                    style="display: none"
+                                    class="w-full py-2.5 px-4 text-xs font-mono font-bold rounded-md transition-all border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 flex items-center justify-center gap-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                    BLOQUEAR PERSPECTIVA & USAR SLIDERS
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-10 pt-8 border-t border-neutral-300 dark:border-neutral-700 space-y-3"
+                        >
+                            <button
+                                id="presentationBtn"
+                                disabled
+                                class="w-full py-4 px-6 bg-neutral-800 hover:bg-neutral-900 active:bg-black dark:bg-neutral-700 dark:hover:bg-neutral-600 disabled:bg-neutral-300 dark:disabled:bg-neutral-800 disabled:text-neutral-500 dark:disabled:text-neutral-600 disabled:cursor-not-allowed text-white font-bold rounded-lg shadow-xl shadow-neutral-500/30 disabled:shadow-none transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="14"
+                                        rx="2"
+                                        ry="2"
+                                    ></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line
+                                        x1="12"
+                                        y1="17"
+                                        x2="12"
+                                        y2="21"
+                                    ></line>
+                                </svg>
+                                Apresentação Desktop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Presentation Overlay - ALWAYS LIGHT MODE -->
+        <div
+            id="presentationOverlay"
+            class="hidden fixed inset-0 z-[100] bg-neutral-100 flex flex-col overflow-hidden font-sans"
+        >
+            <!-- Controls -->
+            <div class="absolute top-4 right-4 z-50 flex items-center gap-2">
+                <button
+                    id="exportPresentationBtn"
+                    class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg shadow-lg transition-colors text-sm flex items-center gap-2"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Export JPG (150dpi)
+                </button>
+                <button
+                    id="closePresentation"
+                    class="p-2 bg-white/10 hover:bg-black/10 rounded-full text-neutral-500 hover:text-neutral-900 transition-colors"
+                >
+                    <svg
+                        class="w-8 h-8"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 flex w-full h-full">
+                <!-- Sidebar: LIGHT MODE ONLY -->
+                <div
+                    class="w-[400px] shrink-0 bg-neutral-50 p-8 flex flex-col border-r border-neutral-200"
+                >
+                    <!-- Logo -->
+                    <div class="mb-10">
+                        <img
+                            id="sidebarLogo"
+                            src="Logo_Geral_600px_positivo.png"
+                            alt="IMACX"
+                            class="h-12 mb-2"
+                        />
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="flex flex-col gap-6 flex-1">
+                        <!-- Client & Ref -->
+                        <div
+                            class="p-6 bg-white rounded-lg border border-neutral-200 shadow-md relative z-10 space-y-3"
+                        >
+                            <h3
+                                class="text-xs font-mono uppercase tracking-wider text-neutral-500 flex items-center gap-2"
+                            >
+                                <span
+                                    class="w-2 h-2 bg-orange-500 rounded-full"
+                                ></span>
+                                Cliente
+                            </h3>
+                            <div>
+                                <p
+                                    id="presClient"
+                                    class="font-bold text-lg text-neutral-900 leading-none mb-1 uppercase"
+                                >
+                                    Client Name
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Article -->
+                        <div
+                            class="p-6 bg-white rounded-lg border border-neutral-200 shadow-md relative z-10 space-y-3"
+                        >
+                            <h3
+                                class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 flex items-center gap-2"
+                            >
+                                <span
+                                    class="w-2 h-2 bg-orange-500 rounded-full"
+                                ></span>
+                                Artigo
+                            </h3>
+                            <div>
+                                <p
+                                    id="presTitle"
+                                    class="font-bold text-xl text-neutral-900 leading-tight mb-1 uppercase"
+                                >
+                                    Product Title
+                                </p>
+                                <p
+                                    id="presRef"
+                                    class="font-mono text-xs text-neutral-500 mb-2"
+                                >
+                                    REF: 00000
+                                </p>
+                                <p
+                                    id="presDesc"
+                                    class="text-xs text-neutral-600 leading-relaxed"
+                                >
+                                    Description goes here...
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Specs Grid -->
+                        <div
+                            class="grid grid-cols-3 gap-4 p-4 bg-white rounded-lg border border-neutral-200 shadow-md relative z-10"
+                        >
+                            <div>
+                                <h3
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 mb-1"
+                                >
+                                    POSIÇÃO 1
+                                </h3>
+                                <p
+                                    id="presPosition"
+                                    class="font-mono text-sm font-bold text-neutral-900"
+                                >
+                                    A
+                                </p>
+                            </div>
+                            <div>
+                                <h3
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 mb-1"
+                                >
+                                    DIMENSÃO IMPRESSÃO
+                                </h3>
+                                <p
+                                    id="presSize"
+                                    class="font-mono text-sm font-bold text-neutral-900"
+                                >
+                                    --
+                                </p>
+                            </div>
+                            <div>
+                                <h3
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 mb-1"
+                                >
+                                    Nº CORES
+                                </h3>
+                                <p
+                                    id="presColors"
+                                    class="font-mono text-sm font-bold text-neutral-900"
+                                >
+                                    --
+                                </p>
+                            </div>
+                            <div class="col-span-3">
+                                <h3
+                                    class="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-500 mb-1"
+                                >
+                                    QUANTIDADES
+                                </h3>
+                                <p
+                                    id="presQty"
+                                    class="font-mono text-sm font-bold text-neutral-900"
+                                >
+                                    --
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div
+                        class="mt-auto pt-8 text-[10px] text-neutral-400 font-mono"
+                    >
+                        <p>IMACX.PT</p>
+                    </div>
+                </div>
+
+                <!-- Main: Image -->
+                <div class="flex-1 bg-white relative flex flex-col p-8">
+                    <!-- Header Bar in Main -->
+                    <div
+                        class="flex justify-between items-center mb-4 pb-4 border-b border-neutral-100"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                            ></span>
+                            <span
+                                class="text-xs font-mono uppercase tracking-widest text-neutral-400"
+                                >Mockup Preview</span
+                            >
+                        </div>
+                        <div
+                            class="text-xs font-mono text-neutral-400"
+                            id="presCurrentDate"
+                        >
+                            <!-- Date JS -->
+                        </div>
+                    </div>
+
+                    <!-- Image Container -->
+                    <div
+                        class="flex-1 flex items-center justify-center overflow-hidden bg-neutral-50 rounded-lg border border-dashed border-neutral-200 relative"
+                    >
+                        <img
+                            id="presImage"
+                            src=""
+                            alt="Mockup"
+                            class="max-w-full max-h-full object-contain shadow-2xl"
+                        />
+                    </div>
+
+                    <!-- Disclaimer Footer (Clean, No Orange Background) -->
+                    <div class="mt-6 pt-4 border-t border-neutral-200">
+                        <p
+                            class="text-[10px] leading-relaxed text-neutral-600 text-center max-w-4xl mx-auto font-medium"
+                        >
+                            <span
+                                class="text-orange-600 font-bold uppercase mr-1"
+                                >Nota Importante:</span
+                            >
+                            A fim de garantir a qualidade e exatidão do
+                            trabalho, é favor confirmar a maqueta enviada:
+                            pantone, dimensões da imagem e posicionamento da
+                            mesma. É da responsabilidade do cliente verificar a
+                            totalidade do documento enviado e posteriormente
+                            aprovar. A aprovação da maqueta vincula a produção.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Theme toggle
+            const themeToggle = document.getElementById("themeToggle");
+            const html = document.documentElement;
+
+            // Logo element
+            const mainLogo = document.getElementById("mainLogo");
+
+            function updateLogo(theme) {
+                if (theme === "dark") {
+                    mainLogo.src = "LOGOS/imacx_neg.svg";
+                } else {
+                    mainLogo.src = "LOGOS/imacx_pos.svg";
+                }
+            }
+
+            // Check for saved theme preference or default to 'dark'
+            const currentTheme = localStorage.getItem("theme") || "dark";
+            html.classList.toggle("dark", currentTheme === "dark");
+            updateLogo(currentTheme);
+
+            themeToggle.addEventListener("click", () => {
+                html.classList.toggle("dark");
+                const theme = html.classList.contains("dark")
+                    ? "dark"
+                    : "light";
+                localStorage.setItem("theme", theme);
+                updateLogo(theme);
+            });
+
+            // Help modal toggle
+            const helpToggle = document.getElementById("helpToggle");
+            const helpModal = document.getElementById("helpModal");
+            const closeHelp = document.getElementById("closeHelp");
+
+            helpToggle.addEventListener("click", () => {
+                helpModal.classList.remove("hidden");
+            });
+
+            closeHelp.addEventListener("click", () => {
+                helpModal.classList.add("hidden");
+            });
+
+            // Close modal when clicking outside
+            helpModal.addEventListener("click", (e) => {
+                if (e.target === helpModal) {
+                    helpModal.classList.add("hidden");
+                }
+            });
+
+            // Canvas & Mockup Logic
+            const canvas = document.getElementById("mockupCanvas");
+            const ctx = canvas.getContext("2d");
+            const productInput = document.getElementById("productInput");
+            const logoInput = document.getElementById("logoInput");
+            const scaleRange = document.getElementById("scaleRange");
+            const scaleLabel = document.getElementById("scaleLabel");
+            const rotationRange = document.getElementById("rotationRange");
+            const rotationLabel = document.getElementById("rotationLabel");
+            const rotateLeftBtn = document.getElementById("rotateLeftBtn");
+            const rotateRightBtn = document.getElementById("rotateRightBtn");
+            const emptyState = document.getElementById("emptyState");
+            const mode2DBtn = document.getElementById("mode2D");
+            const modePerspectiveBtn =
+                document.getElementById("modePerspective");
+            const modeDesc = document.getElementById("modeDesc");
+            const lockPerspectiveBtn =
+                document.getElementById("lockPerspective");
+
+            let productImg = null;
+            let logoImg = null;
+            let productBase64 = null;
+            let logoBase64 = null;
+            let logoScale = 0.5;
+            let logoRotation = 0;
+            let logoX = canvas.width * 0.5;
+            let logoY = canvas.height * 0.5;
+            let isDragging = false;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+            let renderMode = "2D"; // '2D' or 'AI'
+
+            // Perspective mode: 4 corner points for manual skewing
+            let perspectiveMode = false;
+            let perspectiveLocked = false; // New flag to lock perspective and enable sliders
+            let logoCorners = null; // Will be {topLeft, topRight, bottomLeft, bottomRight}
+            let draggingCorner = null;
+            let draggingAllCorners = false;
+            let dragStartX = 0;
+            let dragStartY = 0;
+            let initialCorners = null;
+            const CORNER_RADIUS = 8;
+
+            function loadImageFromFile(file, callback) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    const base64 = e.target.result;
+                    img.onload = () => callback(img, base64);
+                    img.src = base64;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            productInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                loadImageFromFile(file, (img, base64) => {
+                    productImg = img;
+                    productBase64 = base64;
+                    if (productImg) {
+                        emptyState.style.display = "none";
+                    }
+                    fitCanvasToProduct();
+                    draw();
+                    updateDownloadState();
+                });
+            });
+
+            logoInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Check for unsupported formats
+                const fileName = file.name.toLowerCase();
+                if (fileName.endsWith(".ai") || fileName.endsWith(".cdr")) {
+                    alert(
+                        "❌ FORMATO NÃO SUPORTADO\n\n" +
+                            "Arquivos AI e CDR não funcionam no navegador.\n\n" +
+                            "✅ SOLUÇÃO: Exporte o logo como PDF ou PNG no seu software de design.",
+                    );
+                    logoInput.value = "";
+                    return;
+                }
+
+                // Handle PDF files
+                if (file.type === "application/pdf") {
+                    try {
+                        await loadPDFAsImage(file);
+                        document.getElementById("removeBgBtn").disabled = false;
+                        updateDownloadState();
+                    } catch (error) {
+                        alert("Erro ao carregar PDF: " + error.message);
+                        logoInput.value = "";
+                    }
+                    return;
+                }
+
+                // Handle regular images
+                loadImageFromFile(file, (img, base64) => {
+                    logoImg = img;
+                    logoBase64 = base64;
+                    logoX = canvas.width * 0.5;
+                    logoY = canvas.height * 0.5;
+                    document.getElementById("removeBgBtn").disabled = false;
+                    draw();
+                    updateDownloadState();
+                });
+            });
+
+            // PDF Loading Function
+            async function loadPDFAsImage(file) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
+                    .promise;
+                const page = await pdf.getPage(1);
+
+                const viewport = page.getViewport({ scale: 2.0 });
+                const pdfCanvas = document.createElement("canvas");
+                const pdfCtx = pdfCanvas.getContext("2d");
+                pdfCanvas.width = viewport.width;
+                pdfCanvas.height = viewport.height;
+
+                await page.render({
+                    canvasContext: pdfCtx,
+                    viewport: viewport,
+                }).promise;
+
+                const dataUrl = pdfCanvas.toDataURL("image/png");
+
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        logoImg = img;
+                        logoBase64 = dataUrl;
+                        logoX = canvas.width * 0.5;
+                        logoY = canvas.height * 0.5;
+                        draw();
+                        resolve();
+                    };
+                    img.src = dataUrl;
+                });
+            }
+
+            // Background Removal Modal
+            const bgRemovalModal = document.getElementById("bgRemovalModal");
+            const removeBgBtn = document.getElementById("removeBgBtn");
+            const closeBgRemoval = document.getElementById("closeBgRemoval");
+            const cancelBgRemoval = document.getElementById("cancelBgRemoval");
+            const applyBgRemoval = document.getElementById("applyBgRemoval");
+            const bgOriginalCanvas =
+                document.getElementById("bgRemovalOriginal");
+            const bgPreviewCanvas = document.getElementById("bgRemovalPreview");
+            const selectedColorDiv = document.getElementById("selectedColor");
+            const toleranceRange = document.getElementById("toleranceRange");
+            const toleranceValue = document.getElementById("toleranceValue");
+
+            let originalImageData = null;
+            let selectedBgColor = { r: 255, g: 255, b: 255 };
+            let tolerance = 30;
+            let originalLogoImg = null; // Stores original logo for undo
+
+            removeBgBtn.addEventListener("click", () => {
+                if (!logoImg) return;
+
+                // Save original if this is first time editing
+                if (!originalLogoImg) {
+                    originalLogoImg = logoImg;
+                }
+
+                // Setup canvases
+                const maxSize = 500;
+                const scale = Math.min(
+                    maxSize / logoImg.width,
+                    maxSize / logoImg.height,
+                );
+                const w = logoImg.width * scale;
+                const h = logoImg.height * scale;
+
+                bgOriginalCanvas.width = w;
+                bgOriginalCanvas.height = h;
+                bgPreviewCanvas.width = w;
+                bgPreviewCanvas.height = h;
+
+                const origCtx = bgOriginalCanvas.getContext("2d");
+                origCtx.drawImage(logoImg, 0, 0, w, h);
+                originalImageData = origCtx.getImageData(0, 0, w, h);
+
+                // Initial preview
+                updateBgPreview();
+                updatePreviewDisplay();
+
+                bgRemovalModal.classList.remove("hidden");
+            });
+
+            closeBgRemoval.addEventListener("click", () => {
+                bgRemovalModal.classList.add("hidden");
+            });
+
+            cancelBgRemoval.addEventListener("click", () => {
+                bgRemovalModal.classList.add("hidden");
+            });
+
+            const undoBgRemoval = document.getElementById("undoBgRemoval");
+
+            undoBgRemoval.addEventListener("click", () => {
+                if (originalLogoImg) {
+                    logoImg = originalLogoImg;
+                    logoBase64 = originalLogoImg.src;
+                    originalLogoImg = null;
+                    draw();
+                    bgRemovalModal.classList.add("hidden");
+                    document.getElementById("undoBgRemoval").disabled = true;
+                }
+            });
+
+            bgOriginalCanvas.addEventListener("click", (e) => {
+                const rect = bgOriginalCanvas.getBoundingClientRect();
+                const x = Math.floor(
+                    (e.clientX - rect.left) *
+                        (bgOriginalCanvas.width / rect.width),
+                );
+                const y = Math.floor(
+                    (e.clientY - rect.top) *
+                        (bgOriginalCanvas.height / rect.height),
+                );
+
+                const ctx = bgOriginalCanvas.getContext("2d");
+                const pixel = ctx.getImageData(x, y, 1, 1).data;
+
+                selectedBgColor = { r: pixel[0], g: pixel[1], b: pixel[2] };
+                selectedColorDiv.style.background = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+
+                updateBgPreview();
+            });
+
+            toleranceRange.addEventListener("input", () => {
+                tolerance = parseInt(toleranceRange.value);
+                toleranceValue.textContent = tolerance;
+                updateBgPreview();
+            });
+
+            // Mode change listener
+            document
+                .querySelectorAll('input[name="bgMode"]')
+                .forEach((radio) => {
+                    radio.addEventListener("change", () => {
+                        updateBgPreview();
+                        updatePreviewDisplay();
+                    });
+                });
+
+            function updatePreviewDisplay() {
+                const bgMode = document.querySelector(
+                    'input[name="bgMode"]:checked',
+                ).value;
+                const previewTitle =
+                    document.getElementById("previewModeTitle");
+
+                if (bgMode === "transparent") {
+                    previewTitle.textContent = "Preview (Tornar Transparente)";
+                } else {
+                    previewTitle.textContent = "Preview (Mudar para Branco)";
+                }
+            }
+
+            function updateBgPreview() {
+                if (!originalImageData) return;
+
+                const bgMode = document.querySelector(
+                    'input[name="bgMode"]:checked',
+                ).value;
+                const data = new Uint8ClampedArray(originalImageData.data);
+                const { r, g, b } = selectedBgColor;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const dr = Math.abs(data[i] - r);
+                    const dg = Math.abs(data[i + 1] - g);
+                    const db = Math.abs(data[i + 2] - b);
+                    const diff = Math.max(dr, dg, db);
+
+                    if (diff <= tolerance * 2.55) {
+                        if (bgMode === "transparent") {
+                            data[i + 3] = 0; // Make transparent
+                        } else {
+                            // Change to white
+                            data[i] = 255; // R
+                            data[i + 1] = 255; // G
+                            data[i + 2] = 255; // B
+                            // Keep alpha as-is
+                        }
+                    }
+                }
+
+                const previewCtx = bgPreviewCanvas.getContext("2d");
+                const imageData = new ImageData(
+                    data,
+                    originalImageData.width,
+                    originalImageData.height,
+                );
+                previewCtx.putImageData(imageData, 0, 0);
+            }
+
+            applyBgRemoval.addEventListener("click", () => {
+                // Get the transparent version
+                const tempCanvas = document.createElement("canvas");
+                tempCanvas.width = bgPreviewCanvas.width;
+                tempCanvas.height = bgPreviewCanvas.height;
+                const tempCtx = tempCanvas.getContext("2d");
+                tempCtx.drawImage(bgPreviewCanvas, 0, 0);
+
+                const dataUrl = tempCanvas.toDataURL("image/png");
+
+                const img = new Image();
+                img.onload = () => {
+                    logoImg = img;
+                    logoBase64 = dataUrl;
+                    draw();
+                    bgRemovalModal.classList.add("hidden");
+
+                    // Enable undo button for next time
+                    document.getElementById("undoBgRemoval").disabled = false;
+                };
+                img.src = dataUrl;
+            });
+
+            function fitCanvasToProduct() {
+                if (!productImg) return;
+                // Keep canvas fixed size for the UI, but scale drawing
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            function drawProduct() {
+                clearCanvas();
+                if (!productImg) {
+                    return;
+                }
+
+                // Fit product to canvas maintaining aspect ratio
+                const scale = Math.min(
+                    canvas.width / productImg.width,
+                    canvas.height / productImg.height,
+                );
+                const w = productImg.width * scale;
+                const h = productImg.height * scale;
+                const x = (canvas.width - w) / 2;
+                const y = (canvas.height - h) / 2;
+
+                ctx.drawImage(productImg, x, y, w, h);
+            }
+
+            function initializeLogoCorners() {
+                if (!logoImg) return;
+                const baseWidth = logoImg.width * logoScale;
+                const baseHeight = logoImg.height * logoScale;
+                const hw = baseWidth / 2;
+                const hh = baseHeight / 2;
+
+                logoCorners = {
+                    topLeft: { x: logoX - hw, y: logoY - hh },
+                    topRight: { x: logoX + hw, y: logoY - hh },
+                    bottomLeft: { x: logoX - hw, y: logoY + hh },
+                    bottomRight: { x: logoX + hw, y: logoY + hh },
+                };
+            }
+
+            function drawLogo() {
+                if (!logoImg) return;
+
+                if (perspectiveMode && logoCorners) {
+                    // Draw with perspective transform using homography
+                    drawLogoPerspective();
+                } else {
+                    // Draw normal 2D with rotation
+                    const baseWidth = logoImg.width * logoScale;
+                    const baseHeight = logoImg.height * logoScale;
+
+                    ctx.save();
+                    ctx.translate(logoX, logoY);
+                    ctx.rotate(logoRotation);
+                    ctx.drawImage(
+                        logoImg,
+                        -baseWidth / 2,
+                        -baseHeight / 2,
+                        baseWidth,
+                        baseHeight,
+                    );
+                    ctx.restore();
+                }
+            }
+
+            function drawLogoPerspective() {
+                // Use simple affine transform approximation for performance
+                const centerX =
+                    (logoCorners.topLeft.x +
+                        logoCorners.topRight.x +
+                        logoCorners.bottomLeft.x +
+                        logoCorners.bottomRight.x) /
+                    4;
+                const centerY =
+                    (logoCorners.topLeft.y +
+                        logoCorners.topRight.y +
+                        logoCorners.bottomLeft.y +
+                        logoCorners.bottomRight.y) /
+                    4;
+
+                const topWidth = Math.sqrt(
+                    Math.pow(
+                        logoCorners.topRight.x - logoCorners.topLeft.x,
+                        2,
+                    ) +
+                        Math.pow(
+                            logoCorners.topRight.y - logoCorners.topLeft.y,
+                            2,
+                        ),
+                );
+                const bottomWidth = Math.sqrt(
+                    Math.pow(
+                        logoCorners.bottomRight.x - logoCorners.bottomLeft.x,
+                        2,
+                    ) +
+                        Math.pow(
+                            logoCorners.bottomRight.y -
+                                logoCorners.bottomLeft.y,
+                            2,
+                        ),
+                );
+                const leftHeight = Math.sqrt(
+                    Math.pow(
+                        logoCorners.bottomLeft.x - logoCorners.topLeft.x,
+                        2,
+                    ) +
+                        Math.pow(
+                            logoCorners.bottomLeft.y - logoCorners.topLeft.y,
+                            2,
+                        ),
+                );
+                const rightHeight = Math.sqrt(
+                    Math.pow(
+                        logoCorners.bottomRight.x - logoCorners.topRight.x,
+                        2,
+                    ) +
+                        Math.pow(
+                            logoCorners.bottomRight.y - logoCorners.topRight.y,
+                            2,
+                        ),
+                );
+
+                const avgWidth = (topWidth + bottomWidth) / 2;
+                const avgHeight = (leftHeight + rightHeight) / 2;
+                const angle = Math.atan2(
+                    logoCorners.topRight.y - logoCorners.topLeft.y,
+                    logoCorners.topRight.x - logoCorners.topLeft.x,
+                );
+
+                const skewX =
+                    (logoCorners.bottomRight.x -
+                        logoCorners.bottomLeft.x -
+                        (logoCorners.topRight.x - logoCorners.topLeft.x)) /
+                    avgHeight;
+                const skewY =
+                    (logoCorners.bottomRight.y -
+                        logoCorners.topRight.y -
+                        (logoCorners.bottomLeft.y - logoCorners.topLeft.y)) /
+                    avgWidth;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle);
+                ctx.transform(1, skewY, skewX, 1, 0, 0);
+                ctx.drawImage(
+                    logoImg,
+                    -avgWidth / 2,
+                    -avgHeight / 2,
+                    avgWidth,
+                    avgHeight,
+                );
+                ctx.restore();
+            }
+
+            function draw(hideHandles = false) {
+                drawProduct();
+                drawLogo();
+
+                // Draw corner handles in perspective mode (unless we're downloading or perspective is locked)
+                if (
+                    perspectiveMode &&
+                    logoCorners &&
+                    !hideHandles &&
+                    !perspectiveLocked
+                ) {
+                    drawCornerHandles();
+                }
+            }
+
+            function drawCornerHandles() {
+                ctx.strokeStyle = "#ff6b00";
+                ctx.fillStyle = "#ff6b00";
+                ctx.lineWidth = 2;
+
+                // Draw lines between corners
+                ctx.beginPath();
+                ctx.moveTo(logoCorners.topLeft.x, logoCorners.topLeft.y);
+                ctx.lineTo(logoCorners.topRight.x, logoCorners.topRight.y);
+                ctx.lineTo(
+                    logoCorners.bottomRight.x,
+                    logoCorners.bottomRight.y,
+                );
+                ctx.lineTo(logoCorners.bottomLeft.x, logoCorners.bottomLeft.y);
+                ctx.closePath();
+                ctx.stroke();
+
+                // Draw corner circles
+                Object.values(logoCorners).forEach((corner) => {
+                    ctx.beginPath();
+                    ctx.arc(corner.x, corner.y, CORNER_RADIUS, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#fff";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+            }
+
+            function getCornerAtPoint(x, y) {
+                if (!logoCorners) return null;
+
+                for (let [name, corner] of Object.entries(logoCorners)) {
+                    const dx = x - corner.x;
+                    const dy = y - corner.y;
+                    if (Math.sqrt(dx * dx + dy * dy) <= CORNER_RADIUS + 5) {
+                        return name;
+                    }
+                }
+                return null;
+            }
+
+            function isPointInPerspectiveArea(x, y) {
+                if (!logoCorners) return false;
+
+                // Simple bounding box check
+                const minX = Math.min(
+                    logoCorners.topLeft.x,
+                    logoCorners.topRight.x,
+                    logoCorners.bottomLeft.x,
+                    logoCorners.bottomRight.x,
+                );
+                const maxX = Math.max(
+                    logoCorners.topLeft.x,
+                    logoCorners.topRight.x,
+                    logoCorners.bottomLeft.x,
+                    logoCorners.bottomRight.x,
+                );
+                const minY = Math.min(
+                    logoCorners.topLeft.y,
+                    logoCorners.topRight.y,
+                    logoCorners.bottomLeft.y,
+                    logoCorners.bottomRight.y,
+                );
+                const maxY = Math.max(
+                    logoCorners.topLeft.y,
+                    logoCorners.topRight.y,
+                    logoCorners.bottomLeft.y,
+                    logoCorners.bottomRight.y,
+                );
+
+                return x >= minX && x <= maxX && y >= minY && y <= maxY;
+            }
+
+            let previousScale = 0.5; // Track previous scale for perspective scaling
+
+            scaleRange.addEventListener("input", () => {
+                const value = Number(scaleRange.value);
+                scaleLabel.textContent = value;
+                const newScale = value / 100;
+
+                // If perspective is locked, scale the corners proportionally
+                if (perspectiveLocked && logoCorners) {
+                    const centerX =
+                        (logoCorners.topLeft.x +
+                            logoCorners.topRight.x +
+                            logoCorners.bottomLeft.x +
+                            logoCorners.bottomRight.x) /
+                        4;
+                    const centerY =
+                        (logoCorners.topLeft.y +
+                            logoCorners.topRight.y +
+                            logoCorners.bottomLeft.y +
+                            logoCorners.bottomRight.y) /
+                        4;
+
+                    const scaleFactor = newScale / previousScale;
+
+                    Object.keys(logoCorners).forEach((key) => {
+                        const dx = logoCorners[key].x - centerX;
+                        const dy = logoCorners[key].y - centerY;
+                        logoCorners[key].x = centerX + dx * scaleFactor;
+                        logoCorners[key].y = centerY + dy * scaleFactor;
+                    });
+                }
+
+                logoScale = newScale;
+                previousScale = newScale;
+                draw();
+            });
+
+            function updateRotation(degrees) {
+                let newDegrees = degrees % 360;
+                if (newDegrees > 180) newDegrees -= 360;
+                if (newDegrees < -180) newDegrees += 360;
+                rotationRange.value = newDegrees;
+                rotationLabel.textContent = newDegrees;
+                logoRotation = (newDegrees * Math.PI) / 180;
+                draw();
+            }
+
+            rotationRange.addEventListener("input", () => {
+                const value = Number(rotationRange.value);
+                rotationLabel.textContent = value;
+                logoRotation = (value * Math.PI) / 180;
+                draw();
+            });
+
+            rotateLeftBtn.addEventListener("click", () => {
+                const currentDeg = Math.round((logoRotation * 180) / Math.PI);
+                updateRotation(currentDeg - 90);
+            });
+
+            rotateRightBtn.addEventListener("click", () => {
+                const currentDeg = Math.round((logoRotation * 180) / Math.PI);
+                updateRotation(currentDeg + 90);
+            });
+
+            function isPointInLogo(x, y) {
+                if (!logoImg) return false;
+                const dx = x - logoX;
+                const dy = y - logoY;
+                const cos = Math.cos(-logoRotation);
+                const sin = Math.sin(-logoRotation);
+                const localX = dx * cos - dy * sin;
+                const localY = dx * sin + dy * cos;
+                const w = logoImg.width * logoScale;
+                const h = logoImg.height * logoScale;
+                return (
+                    localX >= -w / 2 &&
+                    localX <= w / 2 &&
+                    localY >= -h / 2 &&
+                    localY <= h / 2
+                );
+            }
+
+            canvas.addEventListener("mousedown", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+
+                // Check for corner dragging in perspective mode (only if not locked)
+                if (perspectiveMode && logoCorners) {
+                    // Only allow corner dragging if not locked
+                    if (!perspectiveLocked) {
+                        const corner = getCornerAtPoint(x, y);
+                        if (corner) {
+                            draggingCorner = corner;
+                            canvas.style.cursor = "grabbing";
+                            return;
+                        }
+                    }
+
+                    // Always allow moving the entire logo (even when locked)
+                    if (isPointInPerspectiveArea(x, y)) {
+                        draggingAllCorners = true;
+                        dragStartX = x;
+                        dragStartY = y;
+                        initialCorners = {
+                            topLeft: { ...logoCorners.topLeft },
+                            topRight: { ...logoCorners.topRight },
+                            bottomLeft: { ...logoCorners.bottomLeft },
+                            bottomRight: { ...logoCorners.bottomRight },
+                        };
+                        canvas.style.cursor = "grabbing";
+                        return;
+                    }
+                }
+
+                // Normal logo dragging
+                if (isPointInLogo(x, y)) {
+                    isDragging = true;
+                    dragOffsetX = x - logoX;
+                    dragOffsetY = y - logoY;
+                    canvas.style.cursor = "grabbing";
+                }
+            });
+
+            window.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+
+                // Handle corner dragging
+                if (draggingCorner) {
+                    logoCorners[draggingCorner].x = x;
+                    logoCorners[draggingCorner].y = y;
+                    draw();
+                    return;
+                }
+                // Handle dragging all corners (moving the logo)
+                if (draggingAllCorners) {
+                    const dx = x - dragStartX;
+                    const dy = y - dragStartY;
+                    logoCorners.topLeft.x = initialCorners.topLeft.x + dx;
+                    logoCorners.topLeft.y = initialCorners.topLeft.y + dy;
+                    logoCorners.topRight.x = initialCorners.topRight.x + dx;
+                    logoCorners.topRight.y = initialCorners.topRight.y + dy;
+                    logoCorners.bottomLeft.x = initialCorners.bottomLeft.x + dx;
+                    logoCorners.bottomLeft.y = initialCorners.bottomLeft.y + dy;
+                    logoCorners.bottomRight.x =
+                        initialCorners.bottomRight.x + dx;
+                    logoCorners.bottomRight.y =
+                        initialCorners.bottomRight.y + dy;
+                    draw();
+                    return;
+                }
+
+                // Normal logo dragging
+                if (!isDragging) return;
+                logoX = x - dragOffsetX;
+                logoY = y - dragOffsetY;
+                draw();
+            });
+
+            window.addEventListener("mouseup", () => {
+                isDragging = false;
+                draggingCorner = null;
+                draggingAllCorners = false;
+                canvas.style.cursor = "move";
+            });
+
+            function updateDownloadState() {
+                const presentationBtn =
+                    document.getElementById("presentationBtn");
+                if (presentationBtn) {
+                    presentationBtn.disabled = !(productImg && logoImg);
+                }
+            }
+
+            // Helper for text wrapping
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(" ");
+                let line = "";
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + " ";
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        ctx.fillText(line, x, y);
+                        line = words[n] + " ";
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, y);
+                return y;
+            }
+
+            // Export Presentation Button
+            const exportPresentationBtn = document.getElementById(
+                "exportPresentationBtn",
+            );
+            if (exportPresentationBtn) {
+                exportPresentationBtn.addEventListener("click", async () => {
+                    try {
+                        exportPresentationBtn.disabled = true;
+                        const originalText = exportPresentationBtn.innerHTML;
+                        exportPresentationBtn.innerHTML = `Generating...`;
+
+                        // Wait a bit for UI to update
+                        await new Promise((resolve) =>
+                            setTimeout(resolve, 100),
+                        );
+
+                        // Get the presentation overlay
+                        const overlay = document.getElementById(
+                            "presentationOverlay",
+                        );
+
+                        // Temporarily hide the export button
+                        exportPresentationBtn.style.display = "none";
+                        const closeBtn =
+                            document.getElementById("closePresentation");
+                        closeBtn.style.display = "none";
+
+                        // Use the browser's built-in screenshot capability
+                        // We'll create a canvas from the DOM elements
+                        const exportCanvas = document.createElement("canvas");
+                        const scale = 2; // Higher resolution
+                        exportCanvas.width = 1754;
+                        exportCanvas.height = 1240;
+                        const ctx = exportCanvas.getContext("2d");
+
+                        // Fill white background
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(
+                            0,
+                            0,
+                            exportCanvas.width,
+                            exportCanvas.height,
+                        );
+
+                        // Draw sidebar background - ALWAYS LIGHT MODE
+                        const sidebarWidth = 500;
+                        ctx.fillStyle = "#fafafa";
+                        ctx.fillRect(0, 0, sidebarWidth, exportCanvas.height);
+                        ctx.strokeStyle = "#e5e5e5";
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(0, 0, sidebarWidth, exportCanvas.height);
+
+                        let y = 60;
+                        const xPadding = 50;
+                        const cardWidth = sidebarWidth - xPadding * 2;
+
+                        // Draw logo from PNG file
+                        const logoImg = new Image();
+                        logoImg.src = "Logo_Geral_600px_positivo.png";
+                        await new Promise((resolve, reject) => {
+                            logoImg.onload = resolve;
+                            logoImg.onerror = reject;
+                        });
+
+                        const logoHeight = 60;
+                        const logoRatio = logoImg.width / logoImg.height;
+                        const logoWidth = logoHeight * logoRatio;
+                        ctx.drawImage(
+                            logoImg,
+                            xPadding,
+                            y,
+                            logoWidth,
+                            logoHeight,
+                        );
+                        y += 100;
+
+                        function drawCard(yPos, height) {
+                            ctx.fillStyle = "#ffffff";
+                            ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+                            ctx.shadowBlur = 10;
+                            ctx.shadowOffsetX = 0;
+                            ctx.shadowOffsetY = 4;
+                            ctx.fillRect(xPadding, yPos, cardWidth, height);
+                            ctx.shadowColor = "transparent";
+                            ctx.strokeStyle = "#e5e5e5";
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(xPadding, yPos, cardWidth, height);
+                            return yPos + height + 30;
+                        }
+
+                        // Client Card
+                        let clientY = y;
+                        const clientName =
+                            document.getElementById("presClient").textContent;
+                        const clientCardHeight = 120;
+                        y = drawCard(clientY, clientCardHeight);
+
+                        ctx.fillStyle = "#FF7518";
+                        ctx.beginPath();
+                        ctx.arc(xPadding + 20, clientY + 25, 4, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText("CLIENTE", xPadding + 35, clientY + 28);
+
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 24px sans-serif";
+                        ctx.fillText(
+                            clientName.toUpperCase(),
+                            xPadding + 20,
+                            clientY + 70,
+                        );
+
+                        // Article Card
+                        let articleY = y;
+                        const title =
+                            document.getElementById("presTitle").textContent;
+                        const ref =
+                            document.getElementById("presRef").textContent;
+                        const desc =
+                            document.getElementById("presDesc").textContent;
+                        const articleCardHeight = 300;
+                        y = drawCard(articleY, articleCardHeight);
+
+                        ctx.fillStyle = "#FF7518";
+                        ctx.beginPath();
+                        ctx.arc(
+                            xPadding + 20,
+                            articleY + 25,
+                            4,
+                            0,
+                            Math.PI * 2,
+                        );
+                        ctx.fill();
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText("ARTIGO", xPadding + 35, articleY + 28);
+
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 24px sans-serif";
+                        ctx.fillText(
+                            title.toUpperCase(),
+                            xPadding + 20,
+                            articleY + 70,
+                        );
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "14px monospace";
+                        ctx.fillText(ref, xPadding + 20, articleY + 100);
+
+                        ctx.fillStyle = "#525252";
+                        ctx.font = "14px sans-serif";
+                        wrapText(
+                            ctx,
+                            desc,
+                            xPadding + 20,
+                            articleY + 140,
+                            cardWidth - 40,
+                            20,
+                        );
+
+                        // Specs Grid Card
+                        let specsY = y;
+                        const specsHeight = 180;
+                        y = drawCard(specsY, specsHeight);
+
+                        const position =
+                            document.getElementById("presPosition").textContent;
+                        const size =
+                            document.getElementById("presSize").textContent;
+                        const colors =
+                            document.getElementById("presColors").textContent;
+                        const qty =
+                            document.getElementById("presQty").textContent;
+
+                        const colWidth = cardWidth / 3;
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText("POSIÇÃO 1", xPadding + 20, specsY + 40);
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 16px monospace";
+                        ctx.fillText(position, xPadding + 20, specsY + 65);
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText(
+                            "DIMENSÃO IMPRESSÃO",
+                            xPadding + 20 + colWidth,
+                            specsY + 40,
+                        );
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 16px monospace";
+                        ctx.fillText(
+                            size,
+                            xPadding + 20 + colWidth,
+                            specsY + 65,
+                        );
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText(
+                            "Nº CORES",
+                            xPadding + 20 + colWidth * 2,
+                            specsY + 40,
+                        );
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 16px monospace";
+                        ctx.fillText(
+                            colors,
+                            xPadding + 20 + colWidth * 2,
+                            specsY + 65,
+                        );
+
+                        ctx.fillStyle = "#737373";
+                        ctx.font = "12px monospace";
+                        ctx.fillText(
+                            "QUANTIDADES",
+                            xPadding + 20,
+                            specsY + 110,
+                        );
+                        ctx.fillStyle = "#171717";
+                        ctx.font = "bold 16px monospace";
+                        ctx.fillText(qty, xPadding + 20, specsY + 135);
+
+                        ctx.fillStyle = "#a3a3a3";
+                        ctx.font = "12px monospace";
+                        ctx.fillText(
+                            "IMACX.PT",
+                            xPadding,
+                            exportCanvas.height - 40,
+                        );
+
+                        // Main area
+                        const mainX = sidebarWidth;
+                        const mainWidth = exportCanvas.width - sidebarWidth;
+
+                        ctx.beginPath();
+                        ctx.moveTo(mainX + 40, 100);
+                        ctx.lineTo(exportCanvas.width - 40, 100);
+                        ctx.strokeStyle = "#f5f5f5";
+                        ctx.stroke();
+
+                        ctx.fillStyle = "#22c55e";
+                        ctx.beginPath();
+                        ctx.arc(mainX + 50, 80, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = "#a3a3a3";
+                        ctx.font = "12px monospace";
+                        ctx.fillText("MOCKUP PREVIEW", mainX + 65, 84);
+
+                        const dateText = document
+                            .getElementById("presCurrentDate")
+                            .textContent.trim();
+                        ctx.textAlign = "right";
+                        ctx.fillText(dateText, exportCanvas.width - 50, 84);
+                        ctx.textAlign = "left";
+
+                        const imgAreaX = mainX + 50;
+                        const imgAreaY = 140;
+                        const imgAreaW = mainWidth - 100;
+                        const imgAreaH = exportCanvas.height - 300;
+
+                        ctx.fillStyle = "#fafafa";
+                        ctx.fillRect(imgAreaX, imgAreaY, imgAreaW, imgAreaH);
+                        ctx.strokeStyle = "#e5e5e5";
+                        ctx.setLineDash([5, 5]);
+                        ctx.strokeRect(imgAreaX, imgAreaY, imgAreaW, imgAreaH);
+                        ctx.setLineDash([]);
+
+                        // Draw the mockup image - recreate from base64 to avoid CORS
+                        if (productBase64 && logoBase64) {
+                            // Create a temporary canvas to recreate the mockup
+                            const tempCanvas = document.createElement("canvas");
+                            const mainCanvas =
+                                document.getElementById("mockupCanvas");
+                            tempCanvas.width = mainCanvas.width;
+                            tempCanvas.height = mainCanvas.height;
+                            const tempCtx = tempCanvas.getContext("2d");
+
+                            // Draw product image
+                            const productImage = new Image();
+                            productImage.src = productBase64;
+                            await new Promise((r) => (productImage.onload = r));
+                            tempCtx.drawImage(
+                                productImage,
+                                0,
+                                0,
+                                tempCanvas.width,
+                                tempCanvas.height,
+                            );
+
+                            // Draw logo on top
+                            const logoImage = new Image();
+                            logoImage.src = logoBase64;
+                            await new Promise((r) => (logoImage.onload = r));
+
+                            // Use the same logo drawing logic as the main canvas
+                            if (!perspectiveMode) {
+                                // 2D mode - simple centered drawing with scale and rotation
+                                tempCtx.save();
+                                tempCtx.translate(logoX, logoY);
+                                tempCtx.rotate(logoRotation);
+                                tempCtx.drawImage(
+                                    logoImage,
+                                    -(logoImage.width * logoScale) / 2,
+                                    -(logoImage.height * logoScale) / 2,
+                                    logoImage.width * logoScale,
+                                    logoImage.height * logoScale,
+                                );
+                                tempCtx.restore();
+                            } else if (logoCorners) {
+                                // Perspective mode - draw using corner positions
+                                tempCtx.save();
+                                const centerX =
+                                    (logoCorners.topLeft.x +
+                                        logoCorners.topRight.x +
+                                        logoCorners.bottomLeft.x +
+                                        logoCorners.bottomRight.x) /
+                                    4;
+                                const centerY =
+                                    (logoCorners.topLeft.y +
+                                        logoCorners.topRight.y +
+                                        logoCorners.bottomLeft.y +
+                                        logoCorners.bottomRight.y) /
+                                    4;
+                                const width = Math.sqrt(
+                                    Math.pow(
+                                        logoCorners.topRight.x -
+                                            logoCorners.topLeft.x,
+                                        2,
+                                    ) +
+                                        Math.pow(
+                                            logoCorners.topRight.y -
+                                                logoCorners.topLeft.y,
+                                            2,
+                                        ),
+                                );
+                                const height = Math.sqrt(
+                                    Math.pow(
+                                        logoCorners.bottomLeft.x -
+                                            logoCorners.topLeft.x,
+                                        2,
+                                    ) +
+                                        Math.pow(
+                                            logoCorners.bottomLeft.y -
+                                                logoCorners.topLeft.y,
+                                            2,
+                                        ),
+                                );
+                                tempCtx.drawImage(
+                                    logoImage,
+                                    centerX - width / 2,
+                                    centerY - height / 2,
+                                    width,
+                                    height,
+                                );
+                                tempCtx.restore();
+                            }
+
+                            // Now draw this clean canvas to export
+                            const scale = Math.min(
+                                imgAreaW / tempCanvas.width,
+                                imgAreaH / tempCanvas.height,
+                            );
+                            const w = tempCanvas.width * scale;
+                            const h = tempCanvas.height * scale;
+                            const ix = imgAreaX + (imgAreaW - w) / 2;
+                            const iy = imgAreaY + (imgAreaH - h) / 2;
+
+                            ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+                            ctx.shadowBlur = 20;
+                            ctx.shadowOffsetY = 10;
+                            ctx.drawImage(tempCanvas, ix, iy, w, h);
+                            ctx.shadowColor = "transparent";
+                        }
+
+                        const disclaimerY = exportCanvas.height - 100;
+                        ctx.beginPath();
+                        ctx.moveTo(mainX + 40, disclaimerY - 20);
+                        ctx.lineTo(exportCanvas.width - 40, disclaimerY - 20);
+                        ctx.strokeStyle = "#e5e5e5";
+                        ctx.stroke();
+
+                        ctx.fillStyle = "#ea580c";
+                        ctx.font = "bold 12px sans-serif";
+                        ctx.fillText(
+                            "NOTA IMPORTANTE:",
+                            mainX + 50,
+                            disclaimerY + 10,
+                        );
+
+                        ctx.fillStyle = "#525252";
+                        ctx.font = "12px sans-serif";
+                        const disclaimerText =
+                            "A fim de garantir a qualidade e exatidão do trabalho, é favor confirmar a maqueta enviada: pantone, dimensões da imagem e posicionamento da mesma. É da responsabilidade do cliente verificar a totalidade do documento enviado e posteriormente aprovar. A aprovação da maqueta vincula a produção.";
+                        wrapText(
+                            ctx,
+                            disclaimerText,
+                            mainX + 180,
+                            disclaimerY + 10,
+                            imgAreaW - 150,
+                            18,
+                        );
+
+                        // Download
+                        const link = document.createElement("a");
+                        link.download = "presentation-export.jpg";
+                        link.href = exportCanvas.toDataURL("image/jpeg", 0.9);
+                        link.click();
+
+                        // Restore buttons
+                        exportPresentationBtn.style.display = "";
+                        closeBtn.style.display = "";
+                        exportPresentationBtn.innerHTML = originalText;
+                        exportPresentationBtn.disabled = false;
+                    } catch (error) {
+                        console.error("Export error:", error);
+                        alert("Error exporting image: " + error.message);
+                        const exportPresentationBtn = document.getElementById(
+                            "exportPresentationBtn",
+                        );
+                        const closeBtn =
+                            document.getElementById("closePresentation");
+                        exportPresentationBtn.style.display = "";
+                        closeBtn.style.display = "";
+                        exportPresentationBtn.disabled = false;
+                        exportPresentationBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg> Export JPG (150dpi)`;
+                    }
+                });
+            }
+
+            // Mode toggle handlers
+            function setActiveMode(mode) {
+                [mode2DBtn, modePerspectiveBtn].forEach((btn) => {
+                    btn.classList.remove(
+                        "bg-orange-500",
+                        "text-white",
+                        "border-orange-500",
+                    );
+                    btn.classList.add(
+                        "border-neutral-300",
+                        "dark:border-neutral-700",
+                        "text-neutral-600",
+                        "dark:text-neutral-400",
+                    );
+                });
+
+                if (mode === "2D") {
+                    mode2DBtn.classList.add(
+                        "bg-orange-500",
+                        "text-white",
+                        "border-orange-500",
+                    );
+                    mode2DBtn.classList.remove(
+                        "border-neutral-300",
+                        "dark:border-neutral-700",
+                        "text-neutral-600",
+                        "dark:text-neutral-400",
+                    );
+                } else if (mode === "PERSPECTIVE") {
+                    modePerspectiveBtn.classList.add(
+                        "bg-orange-500",
+                        "text-white",
+                        "border-orange-500",
+                    );
+                    modePerspectiveBtn.classList.remove(
+                        "border-neutral-300",
+                        "dark:border-neutral-700",
+                        "text-neutral-600",
+                        "dark:text-neutral-400",
+                    );
+                }
+            }
+
+            mode2DBtn.addEventListener("click", () => {
+                renderMode = "2D";
+                perspectiveMode = false;
+                perspectiveLocked = false;
+                logoCorners = null; // Clear perspective corners when switching to 2D
+                setActiveMode("2D");
+                modeDesc.textContent =
+                    "Sobreposição rápida para produtos planos";
+                if (lockPerspectiveBtn) {
+                    lockPerspectiveBtn.style.display = "none";
+                }
+                draw();
+            });
+
+            modePerspectiveBtn.addEventListener("click", () => {
+                renderMode = "2D";
+                perspectiveMode = true;
+                perspectiveLocked = false; // Reset lock when entering perspective mode
+                if (logoImg && !logoCorners) {
+                    initializeLogoCorners();
+                }
+                setActiveMode("PERSPECTIVE");
+                modeDesc.textContent =
+                    "Arraste os cantos para ajustar a perspectiva manualmente";
+                if (lockPerspectiveBtn) {
+                    lockPerspectiveBtn.style.display = "block";
+                }
+                draw();
+            });
+
+            // Lock Perspective Button Handler
+            if (lockPerspectiveBtn) {
+                lockPerspectiveBtn.addEventListener("click", () => {
+                    if (!logoCorners) return;
+
+                    perspectiveLocked = !perspectiveLocked;
+
+                    if (perspectiveLocked) {
+                        lockPerspectiveBtn.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        PERSPECTIVA BLOQUEADA - SLIDERS ATIVOS
+                    `;
+                        lockPerspectiveBtn.classList.remove(
+                            "bg-green-600",
+                            "hover:bg-green-700",
+                            "border-green-600",
+                        );
+                        lockPerspectiveBtn.classList.add(
+                            "bg-blue-600",
+                            "hover:bg-blue-700",
+                            "border-blue-600",
+                        );
+                        modeDesc.textContent =
+                            "Use os sliders para ajustar tamanho e rotação com a perspectiva bloqueada";
+                    } else {
+                        lockPerspectiveBtn.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        BLOQUEAR PERSPECTIVA & USAR SLIDERS
+                    `;
+                        lockPerspectiveBtn.classList.remove(
+                            "bg-blue-600",
+                            "hover:bg-blue-700",
+                            "border-blue-600",
+                        );
+                        lockPerspectiveBtn.classList.add(
+                            "bg-green-600",
+                            "hover:bg-green-700",
+                            "border-green-600",
+                        );
+                        modeDesc.textContent =
+                            "Arraste os cantos para ajustar a perspectiva manualmente";
+                    }
+
+                    draw();
+                });
+            }
+
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(" ");
+                let line = "";
+                let currentY = y;
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + " ";
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        ctx.fillText(line, x, currentY);
+                        line = words[n] + " ";
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, currentY);
+                return currentY; // Return the final Y position
+            }
+
+            // Presentation Mode Logic
+            const presentationBtn = document.getElementById("presentationBtn");
+            const presentationOverlay = document.getElementById(
+                "presentationOverlay",
+            );
+            const closePresentation =
+                document.getElementById("closePresentation");
+
+            presentationBtn.addEventListener("click", () => {
+                // Gather Data
+                const clientName =
+                    document.getElementById("clientName").value ||
+                    "Cliente não especificado";
+                const refNumber =
+                    document.getElementById("refNumber").value || "---";
+                const productTitle =
+                    document.getElementById("productTitle").value ||
+                    "Sem Título";
+                const productDescription =
+                    document.getElementById("productDescription").value ||
+                    "Sem descrição.";
+                const quantity =
+                    document.getElementById("quantity").value || "---";
+                const deliveryDate =
+                    document.getElementById("deliveryDate").value || "---";
+                const printSize =
+                    document.getElementById("printSize").value || "---";
+                const numColors =
+                    document.getElementById("numColors").value || "---";
+
+                // Update Overlay DOM
+                document.getElementById("presClient").textContent = clientName;
+                document.getElementById("presRef").textContent =
+                    `REF: ${refNumber}`;
+                document.getElementById("presTitle").textContent = productTitle;
+
+                // Format description: Replace newlines with <br> and **text** with <b>text</b>
+                const formattedDesc = productDescription
+                    .replace(/\n/g, "<br>")
+                    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+                document.getElementById("presDesc").innerHTML = formattedDesc;
+
+                document.getElementById("presQty").textContent = quantity;
+                // document.getElementById("presDate").textContent = deliveryDate; // Removed from grid
+                document.getElementById("presSize").textContent = printSize;
+                document.getElementById("presColors").textContent = numColors;
+                document.getElementById("presCurrentDate").textContent =
+                    deliveryDate !== "---"
+                        ? deliveryDate
+                        : new Date().toLocaleDateString();
+
+                // Generate Image
+                draw(true); // Hide handles
+                const dataUrl = canvas.toDataURL("image/png");
+                document.getElementById("presImage").src = dataUrl;
+                draw(false); // Show handles
+
+                // Show Overlay
+                presentationOverlay.classList.remove("hidden");
+            });
+
+            closePresentation.addEventListener("click", () => {
+                presentationOverlay.classList.add("hidden");
+            });
+
+            // Close on Escape key
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    // Close background removal modal if open
+                    if (!bgRemovalModal.classList.contains("hidden")) {
+                        bgRemovalModal.classList.add("hidden");
+                    }
+                    // Close presentation overlay if open
+                    else if (
+                        !presentationOverlay.classList.contains("hidden")
+                    ) {
+                        presentationOverlay.classList.add("hidden");
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
