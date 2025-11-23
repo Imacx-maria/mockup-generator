@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Generator Unit Tests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-pass { color: #16a34a; }
+        .test-fail { color: #dc2626; }
+        .test-container { font-family: monospace; }
+    </style>
+</head>
+<body class="bg-neutral-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-neutral-800 text-white p-6">
+            <h1 class="text-2xl font-bold">Unit Tests: Logo Processor Logic</h1>
+            <p class="opacity-75">Verifying core algorithms for background removal and file handling</p>
+        </div>
+
+        <div id="results" class="p-6 space-y-4 test-container">
+            <!-- Results will appear here -->
+        </div>
+
+        <div class="p-6 border-t bg-neutral-50">
+            <div class="flex justify-between items-center">
+                <div id="summary" class="font-bold">Running tests...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // LOGIC UNDER TEST (Replicated from index.html)
+        // ==========================================
+
+        /**
+         * Background Removal Algorithm
+         * Replicated from updateBgPreview() in index.html
+         */
+        function removeBackground(data, selectedColor, tolerance, mode = 'transparent') {
+            // data is a Uint8ClampedArray (r,g,b,a, r,g,b,a, ...)
+            // selectedColor is {r, g, b}
+            // tolerance is 0-100
+
+            const { r, g, b } = selectedColor;
+            const output = new Uint8ClampedArray(data);
+
+            for (let i = 0; i < output.length; i += 4) {
+                const dr = Math.abs(output[i] - r);
+                const dg = Math.abs(output[i + 1] - g);
+                const db = Math.abs(output[i + 2] - b);
+                const diff = Math.max(dr, dg, db);
+
+                if (diff <= tolerance * 2.55) {
+                    if (mode === "transparent") {
+                        output[i + 3] = 0; // Make transparent
+                    } else if (mode === "white") {
+                        output[i] = 255; // R
+                        output[i + 1] = 255; // G
+                        output[i + 2] = 255; // B
+                        // Keep alpha as-is
+                    }
+                }
+            }
+            return output;
+        }
+
+        /**
+         * File Format Validation
+         * Replicated from file input event listeners
+         */
+        function isSupportedFormat(fileName) {
+            const lower = fileName.toLowerCase();
+            if (lower.endsWith(".ai") || lower.endsWith(".cdr")) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Text Wrapping Logic
+         * Replicated from wrapText()
+         */
+        function wrapText(mockCtx, text, maxWidth) {
+            const words = text.split(" ");
+            let line = "";
+            const lines = [];
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + " ";
+                const metrics = mockCtx.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    lines.push(line);
+                    line = words[n] + " ";
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+            return lines;
+        }
+
+        // ==========================================
+        // TEST FRAMEWORK
+        // ==========================================
+
+        const resultsDiv = document.getElementById('results');
+        let passed = 0;
+        let failed = 0;
+
+        function assert(condition, message) {
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-3 p-2 rounded hover:bg-neutral-50';
+
+            if (condition) {
+                div.innerHTML = `
+                    <span class="text-green-500 font-bold">✓</span>
+                    <span class="text-neutral-700">${message}</span>
+                `;
+                passed++;
+            } else {
+                div.innerHTML = `
+                    <span class="text-red-500 font-bold">✗</span>
+                    <span class="text-red-700 font-bold">${message}</span>
+                `;
+                failed++;
+                console.error("Test Failed:", message);
+            }
+            resultsDiv.appendChild(div);
+        }
+
+        function runTests() {
+            // GROUP 1: Background Removal Logic
+            resultsDiv.innerHTML += `<h3 class="font-bold text-lg mt-4 mb-2 border-b pb-1">Background Removal Algorithm</h3>`;
+
+            // Test 1: Exact match removal
+            {
+                // White pixel (255,255,255,255)
+                const input = new Uint8ClampedArray([255, 255, 255, 255]);
+                const target = { r: 255, g: 255, b: 255 };
+                const tolerance = 10;
+
+                const output = removeBackground(input, target, tolerance, 'transparent');
+                assert(output[3] === 0, "Exact color match should become transparent");
+            }
+
+            // Test 2: Within tolerance removal
+            {
+                // Almost white pixel (250,250,250,255)
+                const input = new Uint8ClampedArray([250, 250, 250, 255]);
+                const target = { r: 255, g: 255, b: 255 };
+                // Difference is 5. Tolerance 10 * 2.55 = 25.5. Should match.
+                const tolerance = 10;
+
+                const output = removeBackground(input, target, tolerance, 'transparent');
+                assert(output[3] === 0, "Color within tolerance should become transparent");
+            }
+
+            // Test 3: Outside tolerance retention
+            {
+                // Grey pixel (200,200,200,255)
+                const input = new Uint8ClampedArray([200, 200, 200, 255]);
+                const target = { r: 255, g: 255, b: 255 };
+                // Difference is 55. Tolerance 10 * 2.55 = 25.5. Should NOT match.
+                const tolerance = 10;
+
+                const output = removeBackground(input, target, tolerance, 'transparent');
+                assert(output[3] === 255, "Color outside tolerance should remain opaque");
+            }
+
+            // Test 4: White replacement mode
+            {
+                // Red pixel (255,0,0,255)
+                const input = new Uint8ClampedArray([255, 0, 0, 255]);
+                const target = { r: 255, g: 0, b: 0 };
+                const tolerance = 10;
+
+                const output = removeBackground(input, target, tolerance, 'white');
+                assert(
+                    output[0] === 255 && output[1] === 255 && output[2] === 255 && output[3] === 255,
+                    "Mode 'white' should change color to white but keep opacity"
+                );
+            }
+
+            // GROUP 2: File Validation
+            resultsDiv.innerHTML += `<h3 class="font-bold text-lg mt-6 mb-2 border-b pb-1">File Format Validation</h3>`;
+
+            assert(isSupportedFormat("logo.png") === true, "PNG files should be supported");
+            assert(isSupportedFormat("logo.jpg") === true, "JPG files should be supported");
+            assert(isSupportedFormat("logo.pdf") === true, "PDF files should be supported");
+            assert(isSupportedFormat("logo.AI") === false, "AI files should be rejected (case insensitive)");
+            assert(isSupportedFormat("logo.cdr") === false, "CDR files should be rejected");
+            assert(isSupportedFormat("logo.pdf.ai") === false, "Files ending in .ai should be rejected");
+
+            // GROUP 3: Text Wrapping
+            resultsDiv.innerHTML += `<h3 class="font-bold text-lg mt-6 mb-2 border-b pb-1">Text Wrapping</h3>`;
+
+            // Mock Canvas Context for measureText
+            const mockCtx = {
+                measureText: (text) => {
+                    // Simple mock: width = number of characters * 10
+                    return { width: text.length * 10 };
+                }
+            };
+
+            // Test 1: No wrap needed
+            {
+                const text = "Hello World";
+                // "Hello World " is 12 chars * 10 = 120px
+                const lines = wrapText(mockCtx, text, 200);
+                assert(lines.length === 1, "Short text should stay on one line");
+                assert(lines[0].trim() === "Hello World", "Text content should be preserved");
+            }
+
+            // Test 2: Wrap needed
+            {
+                const text = "Hello World This Is A Test";
+                // "Hello World " (120px) + "This " (50px) = 170px.
+                // If limit is 150, "This" should bump to next line.
+                const lines = wrapText(mockCtx, text, 150);
+                assert(lines.length > 1, "Long text should wrap to multiple lines");
+                assert(lines[0].includes("Hello World"), "First line should contain first words");
+                assert(lines[1].includes("This"), "Second line should start with wrapped word");
+            }
+
+            // Update Summary
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                Tests Completed: <span class="text-neutral-600">${passed + failed}</span> |
+                Passed: <span class="text-green-600">${passed}</span> |
+                Failed: <span class="text-red-600">${failed}</span>
+            `;
+        }
+
+        // Run all tests on load
+        window.onload = runTests;
+
+    </script>
+</body>
+</html>
